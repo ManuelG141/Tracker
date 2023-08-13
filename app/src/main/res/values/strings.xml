@@ -1,6 +1,3 @@
 <resources>
     <string name="app_name">Tracker</string>
-    <string name="location_Button_text">Get location!</string>
-    <string name="defaultTextSize">24</string>
-    <string name="unkown">unkown</string>
 </resources>

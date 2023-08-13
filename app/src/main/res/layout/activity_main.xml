@@ -15,10 +15,10 @@
         android:theme="?attr/actionBarTheme"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <ImageView
-        android:id="@+id/imageView2"
+        android:id="@+id/gps_image"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_marginTop="16dp"
@@ -27,7 +27,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar2"
         app:srcCompat="@drawable/header_image"
-        android:contentDescription="GPS static image" />
+        android:contentDescription="GPS static image"
+        tools:ignore="HardcodedText"/>
 
     <TextView
         android:id="@+id/latitude_text"
@@ -38,7 +39,8 @@
         android:text="Latitude: "
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+        app:layout_constraintTop_toBottomOf="@+id/gps_image"
+        tools:ignore="HardcodedText" />
 
     <TextView
         android:id="@+id/latitude_value"
@@ -50,7 +52,8 @@
         android:textSize="20sp"
         android:saveEnabled="true"
         app:layout_constraintStart_toEndOf="@+id/latitude_text"
-        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+        app:layout_constraintTop_toBottomOf="@+id/gps_image"
+        tools:ignore="HardcodedText" />
 
     <TextView
         android:id="@+id/longitude_text"
@@ -61,7 +64,8 @@
         android:text="Longitude: "
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/latitude_text" />
+        app:layout_constraintTop_toBottomOf="@+id/latitude_text"
+        tools:ignore="HardcodedText" />
 
     <TextView
         android:id="@+id/longitude_value"
@@ -72,7 +76,8 @@
         android:text="0.00"
         android:textSize="20sp"
         app:layout_constraintStart_toEndOf="@+id/longitude_text"
-        app:layout_constraintTop_toBottomOf="@+id/latitude_value" />
+        app:layout_constraintTop_toBottomOf="@+id/latitude_value"
+        tools:ignore="HardcodedText" />
 
     <TextView
         android:id="@+id/timeStamp_text"
@@ -83,7 +88,8 @@
         android:text="Time: "
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/longitude_text" />
+        app:layout_constraintTop_toBottomOf="@+id/longitude_text"
+        tools:ignore="HardcodedText" />
 
     <TextView
         android:id="@+id/timeStamp_value"
@@ -94,7 +100,8 @@
         android:text="0"
         android:textSize="20sp"
         app:layout_constraintStart_toEndOf="@+id/timeStamp_text"
-        app:layout_constraintTop_toBottomOf="@+id/longitude_value" />
+        app:layout_constraintTop_toBottomOf="@+id/longitude_value"
+        tools:ignore="HardcodedText" />
 
     <TextView
         android:id="@+id/provider_text"
@@ -105,7 +112,8 @@
         android:text="provider: "
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/timeStamp_text" />
+        app:layout_constraintTop_toBottomOf="@+id/timeStamp_text"
+        tools:ignore="HardcodedText" />
 
     <TextView
         android:id="@+id/provider_value"
@@ -116,42 +124,60 @@
         android:text="unkown"
         android:textSize="20sp"
         app:layout_constraintStart_toEndOf="@+id/provider_text"
-        app:layout_constraintTop_toBottomOf="@+id/timeStamp_value" />
+        app:layout_constraintTop_toBottomOf="@+id/timeStamp_value"
+        tools:ignore="HardcodedText" />
 
     <Button
         android:id="@+id/Get_Location_Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/location_Button_text"
+        android:text="Get Location!"
         android:layout_margin="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/provider_value" />
+        app:layout_constraintTop_toBottomOf="@+id/provider_value"
+        tools:ignore="HardcodedText" />
 
     <EditText
-        android:id="@+id/phoneNumber_value"
+        android:id="@+id/ip_address_editText"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_margin="20dp"
-        android:autofillHints="phone"
+        android:layout_marginTop="32dp"
         android:ems="10"
-        android:hint="Phone number"
-        android:inputType="phone"
+        android:hint="Ip Address"
+        android:inputType="text"
+        android:textAlignment="center"
         android:textColorHint="#99000000"
+        android:importantForAutofill="no"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintHorizontal_bias="0.4"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Get_Location_Button"/>
+        app:layout_constraintTop_toBottomOf="@+id/Get_Location_Button"
+        tools:ignore="HardcodedText" />
 
     <Button
-        android:id="@+id/Send_SMS_Button"
+        android:id="@+id/tcp_send_data_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="Send data via SMS"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.516"
+        android:layout_marginTop="32dp"
+        android:text="TCP"
+        app:layout_constraintEnd_toStartOf="@+id/Get_Location_Button"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/phoneNumber_value" />
+        app:layout_constraintTop_toBottomOf="@+id/ip_address_editText"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/udp_send_data_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="UDP"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/Get_Location_Button"
+        app:layout_constraintTop_toBottomOf="@+id/ip_address_editText"
+        tools:ignore="HardcodedText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

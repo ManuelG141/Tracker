@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
-import android.telephony.SmsManager
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
@@ -17,7 +16,6 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
-@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
@@ -25,7 +23,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var longitudeValue: TextView
     private lateinit var timeStampValue: TextView
     private lateinit var providerValue: TextView
-    private lateinit var phoneNumberValue: EditText
+    private lateinit var ipAddressValue: EditText
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,24 +35,40 @@ class MainActivity : AppCompatActivity() {
         longitudeValue = findViewById(R.id.longitude_value)
         timeStampValue = findViewById(R.id.timeStamp_value)
         providerValue = findViewById(R.id.provider_value)
-        phoneNumberValue = findViewById(R.id.phoneNumber_value)
-        
+        ipAddressValue = findViewById(R.id.ip_address_editText)
+
         val getLocationButton = findViewById<Button>(R.id.Get_Location_Button)
-        val sendSMSButton = findViewById<Button>(R.id.Send_SMS_Button)
+        val sendTCPButton = findViewById<Button>(R.id.tcp_send_data_button)
+        val sendUDPButton = findViewById<Button>(R.id.udp_send_data_button)
 
         getLocationButton.setOnClickListener {
             checkLocationPermissions()
         }
-
-        sendSMSButton.setOnClickListener {
-            checkSMSPermission()
+        sendTCPButton.setOnClickListener {
+            Toast.makeText(
+                this,
+                "sending data using TCP (coming soon)",
+                Toast.LENGTH_SHORT
+            )
+                .show()
+        }
+        sendUDPButton.setOnClickListener {
+            Toast.makeText(
+                this,
+                "sending data using UDP (coming soon)",
+                Toast.LENGTH_SHORT
+            )
+                .show()
         }
     }
 
     //This function contains the logic for requesting Location permissions
     private fun requestLocationPermissions() {
         //Evaluate if "ACCESS_COARSE_LOCATION" or "ACCESS_FINE_LOCATION" have already been rejected
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+        if (ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
             || ActivityCompat.shouldShowRequestPermissionRationale(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -75,32 +89,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    //This function contains the logic for requesting SMS permissions
-    private fun requestSMSPermission() {
-        //Evaluate if "SEND_SMS" has already been rejected
-        if (ActivityCompat.shouldShowRequestPermissionRationale(
-                this,
-                Manifest.permission.SEND_SMS
-            )
-        ) {
-            //SMS permissions have been rejected
-            Toast.makeText(this, "SMS permissions rejected", Toast.LENGTH_SHORT).show()
-        } else {
-            //Request SMS permissions
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
-                    Manifest.permission.SEND_SMS
-                ),
-                505
-            )
-        }
-    }
-
     //This function contains the logic to check if location permissions have been accepted
     private fun checkLocationPermissions() {
         //Evaluate if "ACCESS_COARSE_LOCATION" or "ACCESS_FINE_LOCATION" are not accepted
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
             || ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -111,22 +106,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             //Get location permissions
             getUserLocation()
-        }
-    }
-
-    //This function contains the logic to check if SMS permissions have been accepted
-    private fun checkSMSPermission() {
-        //Evaluate if "SEND_SMS" is not accepted
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.SEND_SMS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            //Request SMS permissions
-            requestSMSPermission()
-        } else {
-            //Send SMS
-            sendSMS()
         }
     }
 
@@ -152,24 +131,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun sendSMS() {
-        //Check is all of the required values are stored to send
-        if (phoneNumberValue.text.isNotEmpty() && latitudeValue.text != "0.00" && longitudeValue.text != "0.00" && timeStampValue.text != "0") {
-            Toast.makeText(this, "Sending data via SMS", Toast.LENGTH_SHORT).show()
-            val phoneNumber: String = phoneNumberValue.text.toString()
-            val message =
-                "lat:${latitudeValue.text},lon:${longitudeValue.text},time:${timeStampValue.text}"
-            val smsManager: SmsManager = SmsManager.getDefault()
-            smsManager.sendTextMessage(phoneNumber, null, message, null, null)
-            Toast.makeText(this, "Data successfully sent", Toast.LENGTH_SHORT).show()
-
-        } else if (latitudeValue.text != "0.00" || longitudeValue.text != "0.00" || timeStampValue.text != "0") {
-            Toast.makeText(this, "Get location first!!", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(this, "Enter phone number first!!", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     @Deprecated("Deprecated in Java")
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -190,18 +151,6 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(
                     this,
                     "Location Permissions rejected for the first time",
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
-            }
-        } else if (requestCode == 505) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                sendSMS()
-            } else {
-                //The permissions have not been accepted
-                Toast.makeText(
-                    this,
-                    "SMS Permissions rejected for the first time",
                     Toast.LENGTH_SHORT
                 )
                     .show()
