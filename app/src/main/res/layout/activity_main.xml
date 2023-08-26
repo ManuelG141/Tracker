@@ -104,26 +104,26 @@
         tools:ignore="HardcodedText" />
 
     <TextView
-        android:id="@+id/provider_text"
+        android:id="@+id/status_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
-        android:text="provider: "
+        android:text="status: "
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/timeStamp_text"
         tools:ignore="HardcodedText" />
 
     <TextView
-        android:id="@+id/provider_value"
+        android:id="@+id/status_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
-        android:text="unkown"
+        android:text="unknown"
         android:textSize="20sp"
-        app:layout_constraintStart_toEndOf="@+id/provider_text"
+        app:layout_constraintStart_toEndOf="@+id/status_text"
         app:layout_constraintTop_toBottomOf="@+id/timeStamp_value"
         tools:ignore="HardcodedText" />
 
@@ -141,7 +141,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/provider_value"
+        app:layout_constraintTop_toBottomOf="@+id/status_value"
         tools:ignore="HardcodedText" />
 
     <EditText
@@ -151,12 +151,12 @@
         android:layout_marginTop="16dp"
         android:ems="10"
         android:hint="Port Number"
+        android:importantForAutofill="no"
         android:inputType="number"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ip_address_editText"
-        android:importantForAutofill="no"
         tools:ignore="HardcodedText" />
 
     <Button
@@ -164,7 +164,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Get Location!"
+        android:text="Get location!"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
@@ -172,24 +172,21 @@
         tools:ignore="HardcodedText" />
 
     <Button
-        android:id="@+id/tcp_send_data_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TCP"
-        app:layout_constraintEnd_toStartOf="@+id/Get_Location_Button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Get_Location_Button"
-        tools:ignore="HardcodedText,MissingConstraints" />
-
-    <Button
         android:id="@+id/udp_send_data_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="UDP"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/Get_Location_Button"
-        app:layout_constraintTop_toBottomOf="@+id/Get_Location_Button"
+        app:layout_constraintTop_toTopOf="@+id/Get_Location_Button"
         tools:ignore="HardcodedText,MissingConstraints" />
 
-
+    <Button
+        android:id="@+id/wake_on_server_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="WakeUpServer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/Get_Location_Button"
+        tools:ignore="HardcodedText" />
 </androidx.constraintlayout.widget.ConstraintLayout>
