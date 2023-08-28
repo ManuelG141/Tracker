@@ -15,6 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -107,11 +108,14 @@ class MainActivity : AppCompatActivity() {
     private var latitude: Double = 0.00
     private var longitude: Double = 0.00
     private var timeStamp: Long = 0
+    private val sendInterval = 10000L // Interval to send in milliseconds(10 seconds)
 
     private lateinit var ipAddress: String
     private var portNumber = 0
     private lateinit var message: String
     private lateinit var url: String
+    private var sendData = false
+    private var showUi = true
 
     private lateinit var latitudeValue: TextView
     private lateinit var longitudeValue: TextView
@@ -141,7 +145,12 @@ class MainActivity : AppCompatActivity() {
 
         getLocationButton.setOnClickListener {
             checkLocationPermissions()
-            sendDataToServer()
+            if (sendData) {
+                getLocationButton.text = getString(R.string.stop_sending_data)
+                sendDataToServer()
+            } else {
+                getLocationButton.text = getString(R.string.start_sending_data)
+            }
         }
         sendUDPButton.setOnClickListener {
             showPopUp("sending data over UDP protocol")
@@ -167,6 +176,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        // Detener el envío de datos al entrar en pausa
+        showUi = false
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // Iniciar el envío de datos al entrar en primer plano
+        showUi = true
+    }
+
     private fun setDataToSend() {
         ipAddress = ipAddressValue.text.toString()
         portNumber = stringToInt(portNumberValue.text.toString())
@@ -183,12 +204,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showPopUp(message: String) {
-        Toast.makeText(
-            this@MainActivity,
-            message,
-            Toast.LENGTH_SHORT
-        )
-            .show()
+        if (showUi){
+            runOnUiThread {
+                Toast.makeText(
+                    this@MainActivity,
+                    message,
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        }
     }
 
     //This function contains the logic for requesting Location permissions
@@ -234,12 +259,12 @@ class MainActivity : AppCompatActivity() {
             requestLocationPermissions()
         } else {
             //Get location permissions
-            getUserLocation()
+            sendData = !sendData
         }
     }
 
     @SuppressLint("MissingPermission")
-    private fun getUserLocation() {
+    private suspend fun getUserLocation() {
 //        showPopUp("Getting location")
 //        val location = this.fusedLocationProviderClient.lastLocation
 //        location.addOnSuccessListener {
@@ -252,18 +277,20 @@ class MainActivity : AppCompatActivity() {
 //        }
 //        for (element in locationManager.allProviders) Log.d("Location", element)
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            val result = locationService.getUserLocation(this@MainActivity)
-            if (result != null) {
-                latitude = result.latitude
-                longitude = result.longitude
-                timeStamp = result.time
+        val result = locationService.getUserLocation(this@MainActivity)
+        if (result != null) {
+            latitude = result.latitude
+            longitude = result.longitude
+            timeStamp = result.time
+
+        }
+        if (showUi){
+            runOnUiThread {
+                latitudeValue.text = latitude.toString()
+                longitudeValue.text = longitude.toString()
+                timeStampValue.text = timeStamp.toString()
             }
         }
-
-        latitudeValue.text = latitude.toString()
-        longitudeValue.text = longitude.toString()
-        timeStampValue.text = timeStamp.toString()
     }
 
     @Deprecated("Deprecated in Java")
@@ -280,7 +307,7 @@ class MainActivity : AppCompatActivity() {
             //The requested code matches the one we have defined.
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 //If all seems to be working properly, then get user location
-                getUserLocation()
+                sendData = !sendData
             } else {
                 //The permissions have not been accepted
                 showPopUp("Location Permissions rejected for the first time")
@@ -289,41 +316,41 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sendDataToServer() {
+
         ipAddress = ipAddressValue.text.toString()
         url = "http://$ipAddress:25563/includes/api.php"
 
         lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val client = OkHttpClient()
+            while (sendData) {
+                try {
+                    getUserLocation()
 
-                //Data to send (it can be pars key-value)
-                val jsonParams = JSONObject()
-                jsonParams.put("latitude", "$latitude")
-                jsonParams.put("longitude", "$longitude")
-                jsonParams.put("timeStamp", "$timeStamp")
+                    val client = OkHttpClient()
 
-                val mediaType = "application/json; charset=utf-8".toMediaType()
-                val requestBody = jsonParams.toString().toRequestBody(mediaType)
+                    //Data to send (it can be pars key-value)
+                    val jsonParams = JSONObject()
+                    jsonParams.put("latitude", "$latitude")
+                    jsonParams.put("longitude", "$longitude")
+                    jsonParams.put("timeStamp", "$timeStamp")
 
-                val request = Request.Builder()
-                    .url(url)
-                    .post(requestBody)
-                    .build()
+                    val mediaType = "application/json; charset=utf-8".toMediaType()
+                    val requestBody = jsonParams.toString().toRequestBody(mediaType)
 
-                val response = client.newCall(request).execute()
-                val responseBody = response.body?.string()
+                    val request = Request.Builder()
+                        .url(url)
+                        .post(requestBody)
+                        .build()
 
-                if (responseBody != null) {
-                    runOnUiThread {
-                        showPopUp(responseBody)
-                    }
-
+                    val response = client.newCall(request).execute()
+                    val responseBody = response.body?.string()
+                    showPopUp(responseBody.toString())
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                } catch (e: JSONException) {
+                    e.printStackTrace()
                 }
 
-            } catch (e: IOException) {
-                e.printStackTrace()
-            } catch (e: JSONException) {
-                e.printStackTrace()
+                delay(sendInterval)
             }
         }
     }

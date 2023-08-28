@@ -164,12 +164,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Get location!"
+        android:text="@string/start_sending_data"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/port_number_editText"
-        tools:ignore="HardcodedText" />
+        app:layout_constraintTop_toBottomOf="@+id/port_number_editText" />
 
     <Button
         android:id="@+id/udp_send_data_button"
