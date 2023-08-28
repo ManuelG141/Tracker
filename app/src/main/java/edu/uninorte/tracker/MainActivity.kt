@@ -16,6 +16,13 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONException
+import org.json.JSONObject
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.DatagramPacket
@@ -104,6 +111,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var ipAddress: String
     private var portNumber = 0
     private lateinit var message: String
+    private lateinit var url: String
 
     private lateinit var latitudeValue: TextView
     private lateinit var longitudeValue: TextView
@@ -133,6 +141,7 @@ class MainActivity : AppCompatActivity() {
 
         getLocationButton.setOnClickListener {
             checkLocationPermissions()
+            sendDataToServer()
         }
         sendUDPButton.setOnClickListener {
             showPopUp("sending data over UDP protocol")
@@ -275,6 +284,46 @@ class MainActivity : AppCompatActivity() {
             } else {
                 //The permissions have not been accepted
                 showPopUp("Location Permissions rejected for the first time")
+            }
+        }
+    }
+
+    private fun sendDataToServer() {
+        ipAddress = ipAddressValue.text.toString()
+        url = "http://$ipAddress:25563/includes/api.php"
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val client = OkHttpClient()
+
+                //Data to send (it can be pars key-value)
+                val jsonParams = JSONObject()
+                jsonParams.put("latitude", "$latitude")
+                jsonParams.put("longitude", "$longitude")
+                jsonParams.put("timeStamp", "$timeStamp")
+
+                val mediaType = "application/json; charset=utf-8".toMediaType()
+                val requestBody = jsonParams.toString().toRequestBody(mediaType)
+
+                val request = Request.Builder()
+                    .url(url)
+                    .post(requestBody)
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val responseBody = response.body?.string()
+
+                if (responseBody != null) {
+                    runOnUiThread {
+                        showPopUp(responseBody)
+                    }
+
+                }
+
+            } catch (e: IOException) {
+                e.printStackTrace()
+            } catch (e: JSONException) {
+                e.printStackTrace()
             }
         }
     }
