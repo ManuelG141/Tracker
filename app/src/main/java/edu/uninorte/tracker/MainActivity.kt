@@ -5,9 +5,9 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.LocationManager.*
 import android.os.Bundle
-import android.util.Log
+
 import android.widget.Button
-import android.widget.EditText
+
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -24,82 +24,10 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.net.DatagramPacket
-import java.net.DatagramSocket
-import java.net.InetAddress
-import java.net.Socket
+
 
 // this is an specific class to send data using UDP protocol
-class UdpSender {
-    // this method just send the data using UDP protocol
-    fun sendUdpMessage(message: String, ipAddress: String, port: Int) {
-        // first try doing this
-        try {
-            val udpSocket = DatagramSocket()
-            val dataToSend = message.toByteArray()
-            val address = InetAddress.getByName(ipAddress)
-            val sendPacket = DatagramPacket(dataToSend, dataToSend.size, address, port)
 
-            Log.d("UDP", "sending data over UDP")
-            udpSocket.send(sendPacket)
-            Log.d("UDP", "data send over UDP")
-            udpSocket.close()
-            Log.d("UDP", "socket closed")
-        } // is some there is some problem, the app will do this
-        catch (e: Exception) {
-            Log.d("UDP", "Exception")
-            e.printStackTrace()
-        }
-    }
-}
-
-class WolSender {
-    private var status = "unknown"
-
-    // this method just send the data using TCP protocol
-    fun sendMagicPacket(ipAddress: String, port: Int): String {
-        // first try doing this
-        try {
-            // first create the socket to connect to Ip Address over the TCP port
-            val socket = Socket(ipAddress, port)
-            // create the outputStream that allow to send the data
-            val outputStream: OutputStream = socket.getOutputStream()
-            // create the inputStream that allow to receive the data
-            val inputStream: InputStream = socket.getInputStream()
-
-            Log.d("TCP", "sending data over TCP")
-            outputStream.write("hi".toByteArray())
-            Log.d("TCP", "data send over TCP")
-
-            // Receive response from the server
-            val buffer = ByteArray(1024)
-            val bytesRead = inputStream.read(buffer)
-            if (bytesRead != -1) {
-                status = String(buffer, 0, bytesRead)
-            }
-            Log.d("TCP", "received status: $status")
-
-            Log.d("TCP", "sending data over TCP")
-            outputStream.write("bye".toByteArray())
-            Log.d("TCP", "data send over TCP")
-
-            outputStream.close()
-            Log.d("TCP", "outputStream closed")
-            inputStream.close()
-            Log.d("TCP", "inputStream closed")
-            socket.close()
-            Log.d("TCP", "socket closed")
-            return status
-        } // is some there is some problem, the app will do this
-        catch (e: Exception) {
-            Log.d("TCP", "Exception")
-            e.printStackTrace()
-            return "error"
-        }
-    }
-}
 
 class MainActivity : AppCompatActivity() {
 
@@ -110,10 +38,6 @@ class MainActivity : AppCompatActivity() {
     private var timeStamp: Long = 0
     private val sendInterval = 10000L // Interval to send in milliseconds(10 seconds)
 
-    private lateinit var ipAddress: String
-    private var portNumber = 0
-    private lateinit var message: String
-    private lateinit var url: String
     private var sendData = false
     private var showUi = true
 
@@ -121,8 +45,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var longitudeValue: TextView
     private lateinit var timeStampValue: TextView
     private lateinit var statusValue: TextView
-    private lateinit var ipAddressValue: EditText
-    private lateinit var portNumberValue: EditText
+
 
     @SuppressLint("MissingInflatedId", "SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -133,15 +56,9 @@ class MainActivity : AppCompatActivity() {
         longitudeValue = findViewById(R.id.longitude_value)
         timeStampValue = findViewById(R.id.timeStamp_value)
         statusValue = findViewById(R.id.status_value)
-        ipAddressValue = findViewById(R.id.ip_address_editText)
-        portNumberValue = findViewById(R.id.port_number_editText)
+
 
         val getLocationButton = findViewById<Button>(R.id.Get_Location_Button)
-        val sendUDPButton = findViewById<Button>(R.id.udp_send_data_button)
-        val wakeOnServerButton = findViewById<Button>(R.id.wake_on_server_button)
-
-        val udpSender = UdpSender()
-        val wolSender = WolSender()
 
         getLocationButton.setOnClickListener {
             checkLocationPermissions()
@@ -152,55 +69,6 @@ class MainActivity : AppCompatActivity() {
                 getLocationButton.text = getString(R.string.start_sending_data)
             }
         }
-        sendUDPButton.setOnClickListener {
-            showPopUp("sending data over UDP protocol")
-            setDataToSend()
-            showPopUp("ipAddress:$ipAddress,message:$message")
-            lifecycleScope.launch(Dispatchers.IO) {
-                udpSender.sendUdpMessage(message, ipAddress, portNumber)
-            }
-            showPopUp("data send over UDP protocol")
-        }
-        wakeOnServerButton.setOnClickListener {
-            showPopUp("sending magic packet!")
-            statusValue.text = "Asking for!"
-            ipAddress = ipAddressValue.text.toString()
-            portNumber = 25565
-            var response: String
-            lifecycleScope.launch(Dispatchers.IO) {
-                response = wolSender.sendMagicPacket(ipAddress, portNumber)
-                runOnUiThread {
-                    statusValue.text = response
-                }
-            }
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        // Detener el envío de datos al entrar en pausa
-        showUi = false
-    }
-
-    override fun onStart() {
-        super.onStart()
-        // Iniciar el envío de datos al entrar en primer plano
-        showUi = true
-    }
-
-    private fun setDataToSend() {
-        ipAddress = ipAddressValue.text.toString()
-        portNumber = stringToInt(portNumberValue.text.toString())
-        message = "${latitudeValue.text},${longitudeValue.text},${timeStampValue.text}"
-    }
-
-    private fun stringToInt(string: String): Int {
-        val intValue = try {
-            string.toInt()
-        } catch (e: NumberFormatException) {
-            0
-        }
-        return intValue
     }
 
     private fun showPopUp(message: String) {
@@ -317,8 +185,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun sendDataToServer() {
 
-        ipAddress = ipAddressValue.text.toString()
-        url = "http://$ipAddress:25563/includes/api.php"
 
         lifecycleScope.launch(Dispatchers.IO) {
             while (sendData) {
@@ -327,7 +193,7 @@ class MainActivity : AppCompatActivity() {
 
                     val client = OkHttpClient()
 
-                    //Data to send (it can be pars key-value)
+                    // Data to send (it can be pars key-value)
                     val jsonParams = JSONObject()
                     jsonParams.put("latitude", "$latitude")
                     jsonParams.put("longitude", "$longitude")
@@ -336,21 +202,33 @@ class MainActivity : AppCompatActivity() {
                     val mediaType = "application/json; charset=utf-8".toMediaType()
                     val requestBody = jsonParams.toString().toRequestBody(mediaType)
 
-                    val request = Request.Builder()
-                        .url(url)
-                        .post(requestBody)
-                        .build()
+                    // List of URLs to send data to
+                    val urls = listOf(
+                        "http://hostname8913.ddns.net/includes/api.php",
+                        "http://hostname8914.ddns.net/includes/api.php",
+                        "http://hostname8915.ddns.net/includes/api.php",
+                        "http://hostname8916.ddns.net/includes/api.php"
+                    )
 
-                    val response = client.newCall(request).execute()
-                    val responseBody = response.body?.string()
-                    showPopUp(responseBody.toString())
+                    for (url in urls) {
+                        val request = Request.Builder()
+                            .url(url)
+                            .post(requestBody)
+                            .build()
+
+                        val response = client.newCall(request).execute()
+                        val responseBody = response.body?.string()
+                        showPopUp(responseBody.toString())
+
+
+
+                    }
+                    delay(sendInterval)
                 } catch (e: IOException) {
                     e.printStackTrace()
                 } catch (e: JSONException) {
                     e.printStackTrace()
                 }
-
-                delay(sendInterval)
             }
         }
     }
